@@ -1,0 +1,675 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.crcc.citp.sub.dao.SubBaseInfoMapper">
+    <sql id="Where_Sql">
+        <where>
+            <if test="condition.state!=null and condition.state!=''">
+                and sbi.state = #{condition.state}
+            </if>
+            <if test="condition.idCard!=null and condition.idCard!=''">
+                and scsp.id_card = #{condition.idCard}
+            </if>
+            <if test="condition.supName!=null and condition.supName!=''">
+                and sup.sup_name like concat('%',concat(#{condition.supName},'%'))
+            </if>
+            <if test="condition.name!=null and condition.name!=''">
+                and (sup.legal_person_name like '%'||#{condition.name}||'%'
+                or sbi.id in (select a.base_info_id from sub_contract_sign_person a where a.name like '%'||#{condition.name}||'%'))
+            </if>
+            <if test="condition.projectOrgNode!=null and condition.projectOrgNode!=''">
+                and sbi.project_org_node like concat(#{condition.projectOrgNode},'%')
+            </if>
+            <if test="condition.projectOrgName!=null and condition.projectOrgName!=''">
+                and sbi.project_org_name = #{condition.projectOrgName}
+            </if>
+            <if test="condition.subType!=null and condition.subType!='' ">
+                and sbi.sub_type = #{condition.subType}
+            </if>
+            <if test="condition.enterpriseProType!=null and condition.enterpriseProType!=''">
+                and sbi.enterprise_pro_type = #{condition.enterpriseProType}
+            </if>
+        </where>
+    </sql>
+
+    <sql id="Where_Sql1">
+        <where>
+            sbi.state!='1' and sbi.state is not null
+            <if test="condition.state!=null and condition.state!=''">
+                and sbi.state = #{condition.state}
+            </if>
+            <if test="condition.idCard!=null and condition.idCard!=''">
+                and scsp.id_card = #{condition.idCard}
+            </if>
+            <if test="condition.supName!=null and condition.supName!=''">
+                and sup.sup_name like concat('%',concat(#{condition.supName},'%'))
+            </if>
+            <if test="condition.name!=null and condition.name!=''">
+                and (sup.legal_person_name like '%'||#{condition.name}||'%'
+                or sbi.id in (select a.base_info_id from sub_contract_sign_person a where a.name like '%'||#{condition.name}||'%'))
+            </if>
+            <if test="condition.projectOrgNode!=null and condition.projectOrgNode!=''">
+                and sbi.project_org_node like concat(#{condition.projectOrgNode},'%')
+            </if>
+            <if test="condition.projectOrgName!=null and condition.projectOrgName!=''">
+                and sbi.project_org_name = #{condition.projectOrgName}
+            </if>
+            <if test="condition.subType!=null and condition.subType!='' ">
+                and sbi.sub_type = #{condition.subType}
+            </if>
+            <if test="condition.enterpriseProType!=null and condition.enterpriseProType!=''">
+                and sbi.enterprise_pro_type = #{condition.enterpriseProType}
+            </if>
+
+        </where>
+    </sql>
+
+    <sql id="Where_Sql2">
+        <where>
+            sbi.created_person_sub = #{sub}
+            <if test="condition.state == '1'.toString()">
+                and sbi.state is not null
+            </if>
+            <if test="condition.state == '2'.toString()">
+                and sbi.state is null
+            </if>
+            <if test="condition.idCard!=null and condition.idCard!=''">
+                and scsp.id_card = #{condition.idCard}
+            </if>
+            <if test="condition.supName!=null and condition.supName!=''">
+                and sup.sup_name like concat('%',concat(#{condition.supName},'%'))
+            </if>
+            <if test="condition.name!=null and condition.name!=''">
+                and (sup.legal_person_name like '%'||#{condition.name}||'%'
+                or sbi.id in (select a.base_info_id from sub_contract_sign_person a where a.name like '%'||#{condition.name}||'%'))
+            </if>
+            <if test="condition.projectOrgNode!=null and condition.projectOrgNode!=''">
+                and sbi.project_org_node like concat(#{condition.projectOrgNode},'%')
+            </if>
+            <if test="condition.projectOrgName!=null and condition.projectOrgName!=''">
+                and sbi.project_org_name = #{condition.projectOrgName}
+            </if>
+            <if test="condition.subType!=null and condition.subType!='' ">
+                and sbi.sub_type = #{condition.subType}
+            </if>
+            <if test="condition.enterpriseProType!=null and condition.enterpriseProType!=''">
+                and sbi.enterprise_pro_type = #{condition.enterpriseProType}
+            </if>
+
+        </where>
+    </sql>
+
+    <sql id="Change_Sql">
+        <where>
+            <if test="condition.idCard!=null and condition.idCard!=''">
+                and per.ID_CARD = #{condition.idCard}
+            </if>
+
+            <if test="condition.state!=null and condition.state!=''">
+                and A.state = #{condition.state}
+            </if>
+
+        </where>
+    </sql>
+
+
+    <sql id="Base_Column_List">
+        sbi.id AS id,
+        sup.sup_name as supName,
+        sup.legal_person_name as legalPersonName,
+        sup.legal_person_code as legalPersonCode,
+        sup.legal_person_phone as legalPersonPhone,
+        listagg(to_char(scsp.name), ',') within group (order by sbi.id) as contractSignPerson,
+        listagg(to_char(scsp.id_card), ',') within group (order by sbi.id) as contractSignPersonIdcard,
+        listagg(to_char(scsp.phone), ',') within group (order by sbi.id) as contractSignPersonPhone,
+        listagg(to_char(sac.code), ',') within group (order by sbi.id) as accessCardCode,
+        listagg(to_char(sac.created_time,'yyyy-MM-DD'), ',') within group (order by sbi.id) as createdTime,
+        listagg(to_char(sac.deadline,'yyyy-MM-DD'), ',') within group (order by sbi.id) as deadline,
+        sbi.company_address as companyAddress,
+        sbi.cto as cto,
+        sup.social_id as socialId,
+        sup.registered_capital as registeredCapital,
+        sbi.safety_pro_license_code as safetyProLicenseCode,
+        sbi.safety_pro_license_deadline as safetyProLicenseDeadline,
+        sup.registered_address as registeredAddress,
+        sf.bank_name as accountBank,
+        sf.bank_account as accountCode,
+        sbi.taxpayer as taxpayer,
+        sup.business_scope as businessScope,
+        sup.business_date_end as businessDateEnd,
+        sbi.updated_time as updatedTime,
+        sbi.enterprise_pro_type as enterpriseProType,
+        sbi.project_org_node as projectOrgNode,
+        sbi.project_org_name as projectOrgName
+    </sql>
+
+    <sql id="Base_Column_List_2">
+        sbi.id AS id,
+        sup.sup_name as supName,
+        sup.legal_person_name as legalPersonName,
+        sup.legal_person_code as legalPersonCode,
+        sup.legal_person_phone as legalPersonPhone,
+        listagg(to_char(scsp.name), ',') within group (order by sbi.id) as contractSignPerson,
+        listagg(to_char(scsp.id_card), ',') within group (order by sbi.id) as contractSignPersonIdcard,
+        listagg(to_char(scsp.phone), ',') within group (order by sbi.id) as contractSignPersonPhone,
+        listagg(to_char(sac.code), ',') within group (order by sbi.id) as accessCardCode,
+        listagg(to_char(sac.created_time,'yyyy-MM-DD'), ',') within group (order by sbi.id) as createdTime,
+        listagg(to_char(sac.deadline,'yyyy-MM-DD'), ',') within group (order by sbi.id) as deadline,
+        sbi.company_address as companyAddress,
+        sbi.cto as cto,
+        sup.social_id as socialId,
+        sup.registered_capital as registeredCapital,
+        sbi.safety_pro_license_code as safetyProLicenseCode,
+        sbi.safety_pro_license_deadline as safetyProLicenseDeadline,
+        sup.registered_address as registeredAddress,
+        sbi.taxpayer as taxpayer,
+        sup.business_scope as businessScope,
+        sup.business_date_end as businessDateEnd,
+        sbi.updated_time as updatedTime,
+        sbi.enterprise_pro_type as enterpriseProType,
+        sbi.project_org_node as projectOrgNode,
+        sbi.project_org_name as projectOrgName
+    </sql>
+
+
+    <select id="getBaseInfoPage" resultType="com.crcc.citp.sub.model.BaseInfoDeleteModel">
+        SELECT
+        <include refid="Base_Column_List"/>
+        ,sbi.delete_audit_status as deleteAuditStatus
+        FROM sub_base_info sbi
+        left join supplier sup
+        on sbi.enterprise_id = sup.id
+        left join sub_contract_sign_person scsp
+        on scsp.base_info_id = sbi.id
+        left join sub_access_card sac
+        on sac.contract_sign_person_id = scsp.id
+        left join sub_financial sf
+        on sbi.id=sf.base_info_id
+        <include refid="Where_Sql1"/>
+        group by sbi.id,
+        sup.sup_name,
+        sup.legal_person_name,
+        sup.legal_person_code,
+        sup.legal_person_phone,
+        sbi.company_address,
+        sbi.cto,
+        sup.social_id,
+        sup.registered_capital,
+        sbi.safety_pro_license_code,
+        sbi.safety_pro_license_deadline,
+        sup.registered_address,
+        sf.bank_name,
+        sf.bank_account,
+        sbi.taxpayer,
+        sup.business_scope,
+        sup.business_date_end,
+        sbi.updated_time,
+        sbi.enterprise_pro_type,
+        sbi.project_org_node,
+        sbi.project_org_name,
+        sbi.delete_audit_status
+    </select>
+
+    <select id="getBaseInfoExcel" resultType="java.util.LinkedHashMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM sub_base_info sbi
+        left join supplier sup
+        on sbi.enterprise_id = sup.id
+        left join sub_contract_sign_person scsp
+        on scsp.base_info_id = sbi.id
+        left join sub_access_card sac
+        on sac.contract_sign_person_id = scsp.id
+        left join sub_financial sf
+        on sbi.id=sf.base_info_id
+        <include refid="Where_Sql1"/>
+        group by sbi.id,
+        sup.sup_name,
+        sup.legal_person_name,
+        sup.legal_person_code,
+        sup.legal_person_phone,
+        sbi.company_address,
+        sbi.cto,
+        sup.social_id,
+        sup.registered_capital,
+        sbi.safety_pro_license_code,
+        sbi.safety_pro_license_deadline,
+        sup.registered_address,
+        sf.bank_name,
+        sf.bank_account,
+        sbi.taxpayer,
+        sup.business_scope,
+        sup.business_date_end,
+        sbi.updated_time,
+        sbi.enterprise_pro_type,
+        sbi.project_org_node,
+        sbi.project_org_name
+    </select>
+
+
+    <update id="updateAuditStatus">
+        update sub_base_info sbi
+        <set>
+            <if test="deleteAuditStatus!=null and deleteAuditStatus!=''">
+                sbi.delete_audit_status = #{deleteAuditStatus},
+            </if>
+            <if test="state!=null and state!=''">
+                sbi.state = #{state},
+            </if>
+            <if test="updatedSub!=null and updatedSub!=''">
+                sbi.UPDATED_SUB = #{updatedSub},
+            </if>
+            <if test="updatedPerson!=null and updatedPerson!=''">
+                sbi.UPDATED_PERSON = #{updatedPerson},
+            </if>
+        </set>
+        where sbi.id in (
+        <foreach collection="baseInfoIds" item="item" separator=",">
+            #{item}
+        </foreach>
+        )
+    </update>
+
+    <update id="baseInfoWithdrawByBaseInfoId">
+        update sub_base_info sbi
+        set sbi.state = #{status}
+        where sbi.id in (
+        <foreach collection="baseInfoIds" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        )
+
+    </update>
+
+    <select id="getAccessStatusBySubBaseInfoIds" resultType="java.lang.String">
+        select sac.id
+        FROM sub_base_info sbi
+        left join sub_contract_sign_person scsp
+        on sbi.id = scsp.base_info_id
+        left join sub_access_card sac
+        on sac.contract_sign_person_id = scsp.id
+        where sbi.id in
+        <foreach collection="subBaseInfoIds" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+
+    </select>
+
+    <select id="getSubBaseInfoWithAdmitAndQualified" resultType="com.crcc.citp.sub.entity.SubBaseInfo">
+        SELECT sbi.*,sac.access_permit_status
+        FROM sub_base_info sbi
+        left join sub_contract_sign_person scsp
+        on sbi.id = scsp.base_info_id
+        left join sub_access_card sac
+        on sac.contract_sign_person_id = scsp.id
+        <where>
+            <if test="boo">
+                <![CDATA[
+                and  sac.deadline >= TRUNC(SYSDATE)-1
+                and sac.deadline < TRUNC(SYSDATE)
+                 ]]>
+            </if>
+            and (sac.access_permit_status = 1
+            or sac.access_permit_status = 2)
+            and (sbi.state = '2'
+            or sbi.state = '3')
+        </where>
+
+    </select>
+
+    <select id="getSafeDateAndBusDateByBaseInfoId" resultType="com.crcc.citp.sub.model.SafeDateAndBusDateModel">
+        SELECT sbi.id base_info_id,
+        sbi.safety_pro_license_deadline,
+        sup.business_date_end
+        FROM sub_base_info sbi
+        left join supplier sup
+        on sbi.enterprise_id = sup.id
+        where sbi.id in (
+        <foreach collection="baseInfoIds" item="item"  separator=",">
+            #{item}
+        </foreach>
+        )
+    </select>
+
+    <select id="getQualificationsCertDatByBaseInfoIde" resultType="com.crcc.citp.sub.model.QualificationsDate">
+        SELECT sbi.id base_info_id,sc.deadline FROM sub_base_info sbi
+        left join sub_credentials sc
+        on sbi.id = sc.base_info_id
+        where sbi.id in (
+        <foreach collection="baseInfoIds" item="item" separator=",">
+            #{item}
+        </foreach>
+        )
+        and sc.deadline is not null
+        and sc.status = '生效'
+    </select>
+
+    <select id="getBaseInfoIdByAccessIds" resultType="java.lang.String">
+        SELECT distinct sbi.id
+        FROM sub_access_card sac
+        left join sub_contract_sign_person scsp
+        on sac.contract_sign_person_id = scsp.id
+        left join sub_base_info sbi
+        on scsp.base_info_id = sbi.id
+        where sbi.id is not null
+        and sac.id in
+        <foreach collection="accessIds" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getbaseInfoAuditlList" resultType="com.crcc.citp.sub.entity.SubBaseInfo">
+        select DISTINCT nodePass.WORKFLOW_NODE_ID as wfCurrentNodeId,auditForm.WORKFLOW_CODE as workflowCode,
+        A.CREATED_PERSON,A.ID,A.CREATED_TIME,A.STATE,A.PROJECT_ORG_NAME,sup.SUP_NAME,per.NAME,A.SUB_TYPE
+        from SUB_BASE_INFO A
+        LEFT JOIN SUB_CONTRACT_SIGN_PERSON  per on A.ID= per.BASE_INFO_ID
+        LEFT JOIN SUPPLIER sup  on A.ENTERPRISE_ID = sup.ID
+        LEFT JOIN SUB_WF_AUDIT_FORM auditForm on A.id = auditForm.AUDITING_ID
+        LEFT JOIN SUB_WF_NODE_PASSING nodePass on auditForm.id = nodePass.AUDITING_FORM_ID
+        LEFT JOIN SUB_WF_WORKFLOW_ORG_NODE_AUDI nodeAuditor on nodePass.WORKFLOW_NODE_ID = nodeAuditor.WF_NODE_ID
+        AND not exists (SELECT INNER_MEMBER_ID FROM SUB_WF_AUDITOR_PASSING wfAuditorPassing where
+        wfAuditorPassing.AUDITING_FORM_ID = nodePass.AUDITING_FORM_ID
+        AND wfAuditorPassing.WORKFLOW_NODE_AUDITOR_ID = nodeAuditor.ID AND INNER_MEMBER_ID =
+        #{condition.auditPersonSub})
+        where A.ADD_AUDIT_STATUS = #{condition.addAuditStatus} and nodePass.PASS = #{condition.addAuditStatus} and auditForm.WORKFLOW_CODE =#{condition.code}
+       and (nodeAuditor.person_id= #{condition.auditPersonSub} or nodeAuditor.post_code=#{condition.auditPostcode})  ORDER BY A.CREATED_TIME
+    </select>
+
+    <select id="getLabourDtoInfo" resultType="com.crcc.citp.sub.entity.LabourDto">
+         SELECT
+            B.ID,
+            A.SUP_NAME,
+            B.ENTERPRISE_TYPE,
+            a.registered_Address,
+            A.LEGAL_PERSON_NAME,
+            A.LEGAL_PERSON_CODE,
+            A.LEGAL_PERSON_PHONE,
+            B.CTO,
+            A.SOCIAL_ID,
+            A.REGISTERED_CAPITAL,
+            A.BUSINESS_SCOPE,
+            A.business_Licence_Time,
+            A.foundation_Date,
+            B.safety_Pro_License_Code,
+            b.state,
+            b.init_state,
+            b.safety_Pro_License_Deadline,
+            b.taxpayer,
+            b.safety_Pro_License_File safety_Pro_License_File_str,
+            b.legal_Person_Idcard_File legal_Person_Idcard_File_str,
+            b.company_Tel,
+            b.mail,
+            b.zip_Code,
+            a.business_Code,
+            a.business_Date_Start,
+            a.business_Date_End,
+            a.business_Status,
+            a.registry_Org,
+            a.account_Bank,
+            a.account_Name,
+            a.account_Code,
+            b.enterprise_Id,
+            b.project_Org_Name,
+            b.project_Org_Node,
+            b.add_Audit_Status,
+            b.sub_type,
+            b.update_audit_status,
+            A.company_type,
+            (SELECT org_full_name FROM SUB_SYS_ORG WHERE ORG_CODE = b.project_org_node AND ROWNUM =1) AS belongOrgName
+        FROM
+              SUB_BASE_INFO B left join SUPPLIER A ON A.ID = B.ENTERPRISE_ID
+
+        WHERE
+            b.id = #{createdPersonSubId}
+
+
+    </select>
+    <select id="queryByBaseInfoId" resultType="map">
+        select
+        sup.id as supplierId
+        from SUB_BASE_INFO base
+        left join SUPPLIER sup ON sup.ID = base.ENTERPRISE_ID
+        where base.ID = #{baseInfoId}
+
+    </select>
+    <select id="queryAuditingSub" resultType="com.crcc.citp.sub.entity.SubBaseInfo">
+       select  A.CREATED_PERSON,A.ID,A.CREATED_TIME,A.ADD_AUDIT_STATUS,A.PROJECT_ORG_NAME,A.DELETE_AUDIT_STATUS,A.UPDATED_PERSON,sup.SUP_NAME
+        from sub_base_info A left join SUPPLIER sup on A.ENTERPRISE_ID = sup.ID
+        where
+        A.UPDATED_SUB = #{updatedPersonSub}
+
+             and A.ADD_AUDIT_STATUS  is not null
+    </select>
+    <select id="queryWorkAuditing" resultType="map">
+ select A.AUDITING_ID audId from SUB_WF_AUDIT_FORM A where A.commit_person_name LIKE '%'||#{operationPerson}||'%' and A.WORKFLOW_CODE = 'SUB_DETACH'
+    </select>
+    <select id="queryAddAuditingSub" resultType="com.crcc.citp.sub.entity.SubBaseInfo">
+        select
+        DISTINCT A.CREATED_PERSON,
+        A.ID,
+        A.ADD_AUDIT_STATUS,
+        A.PROJECT_ORG_NAME,
+        A.DELETE_AUDIT_STATUS,
+        A.UPDATED_PERSON,
+        sup.SUP_NAME,
+        aud.CREATE_TIME as CREATED_TIME
+        from sub_base_info A
+        left join
+        SUB_CONTRACT_SIGN_PERSON per
+        on per.BASE_INFO_ID = A.ID
+        left join
+        SUPPLIER sup
+        on  sup.Id = A.ENTERPRISE_ID
+        left join
+        SUB_WF_AUDIT_FORM aud
+        on A.ID = aud.AUDITING_ID
+        WHERE
+        A.ID in
+        <foreach collection="subBaseInfoList" item="item" open="(" close=")" separator=",">
+            #{item.id}
+        </foreach>
+        and A.ADD_AUDIT_STATUS  is not null
+        and A.STATE!='7'
+        and aud.CREATE_TIME = (select
+        max(aud.CREATE_TIME)
+        from
+        sub_base_info  A
+        left join
+        SUB_CONTRACT_SIGN_PERSON   pre
+        on per.BASE_INFO_ID = A.ID
+        left join
+        SUPPLIER sup
+        on  sup.Id = A.ENTERPRISE_ID
+        left join
+        SUB_WF_AUDIT_FORM aud
+        on A.ID = aud.AUDITING_ID
+        WHERE
+        A.ID in
+        <foreach collection="subBaseInfoList" item="item" open="(" close=")" separator=",">
+            #{item.id}
+        </foreach>
+        and A.ADD_AUDIT_STATUS  is not null
+        and A.STATE!='7')
+
+    </select>
+    <select id="queryAccessCardAllMsgById" resultType="com.crcc.citp.sub.model.BaseInfoDeleteModel">
+        SELECT
+        sac.ACCESS_PERMIT_STATUS as accessPermitStatus,
+        sbi.SUB_TYPE as subType,
+        sac.CODE as sacCode,
+        scsp.name  as scspName,
+        scsp.id_card as scspIdCard,
+        to_char(sac.year_check_history) as yearCheckHistory,
+        <include refid="Base_Column_List_2"/>
+        from sub_access_card sac
+        left join sub_contract_sign_person scsp on  sac.contract_sign_person_id = scsp.id
+        left join sub_base_info sbi  on scsp.base_info_id = sbi.id
+        left join supplier sup on sbi.enterprise_id = sup.id
+        where sac.ID = #{id}
+        group by
+        sac.ACCESS_PERMIT_STATUS,
+        sbi.SUB_TYPE,
+        sac.CODE,
+        scsp.name,
+        scsp.id_card,
+        sbi.id,
+        sup.sup_name,
+        sup.legal_person_name,
+        sup.legal_person_code,
+        sup.legal_person_phone,
+        sbi.company_address,
+        sbi.cto,
+        sup.social_id,
+        sup.registered_capital,
+        sbi.safety_pro_license_code,
+        sbi.safety_pro_license_deadline,
+        sup.registered_address,
+        sup.account_bank,
+        sup.account_code,
+        sbi.taxpayer,
+        sup.business_scope,
+        sup.business_date_end,
+        sbi.updated_time,
+        sbi.enterprise_pro_type,
+        sbi.project_org_node,
+        sbi.project_org_name,
+        to_char(sac.year_check_history)
+    </select>
+
+    <select id="querySubBaseInfo" resultType="com.crcc.citp.sub.entity.SubBaseInfo">
+    SELECT
+        A.ID,A.STATE,A.ADD_AUDIT_STATUS
+    FROM
+        SUB_BASE_INFO A,web_user_out b
+    WHERE
+        a.enterprise_id = b.supplier_id
+    and
+        b.id_card = #{idCard}
+
+    </select>
+
+    <select id="queryOrgName" resultType="java.lang.String">
+        SELECT org_full_name
+          FROM SUB_SYS_ORG
+        WHERE ORG_CODE = #{orgCode}
+          AND if_use = 1
+    </select>
+
+    <select id="getAllBaseInfoPage" resultType="com.crcc.citp.sub.model.BaseInfoDeleteModel">
+        SELECT
+        <include refid="Base_Column_List_2"/>
+        ,sbi.delete_audit_status as deleteAuditStatus,sbi.state
+        FROM sub_base_info sbi
+        left join supplier sup
+        on sbi.enterprise_id = sup.id
+        left join sub_contract_sign_person scsp
+        on scsp.base_info_id = sbi.id
+        left join sub_access_card sac
+        on sac.contract_sign_person_id = scsp.id
+        <include refid="Where_Sql1"/>
+        group by sbi.id,
+        sup.sup_name,
+        sup.legal_person_name,
+        sup.legal_person_code,
+        sup.legal_person_phone,
+        sbi.company_address,
+        sbi.cto,
+        sbi.state,
+        sup.social_id,
+        sup.registered_capital,
+        sbi.safety_pro_license_code,
+        sbi.safety_pro_license_deadline,
+        sup.registered_address,
+        sup.account_bank,
+        sup.account_code,
+        sbi.taxpayer,
+        sup.business_scope,
+        sup.business_date_end,
+        sbi.updated_time,
+        sbi.enterprise_pro_type,
+        sbi.project_org_node,
+        sbi.project_org_name,
+        sbi.delete_audit_status
+    </select>
+
+    <select id="queryChangeSub" resultType="com.crcc.citp.sub.entity.SubBaseInfo">
+        select  A.CREATED_PERSON,A.ID,A.CREATED_TIME,A.ADD_AUDIT_STATUS,A.PROJECT_ORG_NAME,A.DELETE_AUDIT_STATUS,A.UPDATED_PERSON,A.UPDATE_AUDIT_STATUS,A.UPDATED_TIME,sup.SUP_NAME
+        from SUB_CONTRACT_SIGN_PERSON per
+        left join  sub_base_info A on per.BASE_INFO_ID = A.ID
+        left join SUPPLIER sup on  sup.Id = A.ENTERPRISE_ID
+        <include refid="Change_Sql"/>
+
+    </select>
+
+    <select id="getInitFinishBaseInfoPage" resultType="com.crcc.citp.sub.model.BaseInfoDeleteModel">
+        SELECT
+        <include refid="Base_Column_List_2"/>
+        ,sbi.delete_audit_status as deleteAuditStatus,sbi.state
+        FROM sub_base_info sbi
+        left join supplier sup
+        on sbi.enterprise_id = sup.id
+        left join sub_contract_sign_person scsp
+        on scsp.base_info_id = sbi.id
+        left join sub_access_card sac
+        on sac.contract_sign_person_id = scsp.id
+        <include refid="Where_Sql2"/>
+        group by sbi.id,
+        sup.sup_name,
+        sup.legal_person_name,
+        sup.legal_person_code,
+        sup.legal_person_phone,
+        sbi.company_address,
+        sbi.cto,
+        sbi.state,
+        sup.social_id,
+        sup.registered_capital,
+        sbi.safety_pro_license_code,
+        sbi.safety_pro_license_deadline,
+        sup.registered_address,
+        sup.account_bank,
+        sup.account_code,
+        sbi.taxpayer,
+        sup.business_scope,
+        sup.business_date_end,
+        sbi.updated_time,
+        sbi.enterprise_pro_type,
+        sbi.project_org_node,
+        sbi.project_org_name,
+        sbi.delete_audit_status
+    </select>
+
+    <select id="getBaseInfoStateChangeExcel" resultType="java.util.LinkedHashMap">
+        SELECT
+        <include refid="Base_Column_List_2"/>
+        ,sbi.state
+        FROM sub_base_info sbi
+        left join supplier sup
+        on sbi.enterprise_id = sup.id
+        left join sub_contract_sign_person scsp
+        on scsp.base_info_id = sbi.id
+        left join sub_access_card sac
+        on sac.contract_sign_person_id = scsp.id
+        <include refid="Where_Sql1"/>
+        group by sbi.id,
+        sup.sup_name,
+        sup.legal_person_name,
+        sup.legal_person_code,
+        sup.legal_person_phone,
+        sbi.company_address,
+        sbi.cto,
+        sbi.state,
+        sup.social_id,
+        sup.registered_capital,
+        sbi.safety_pro_license_code,
+        sbi.safety_pro_license_deadline,
+        sup.registered_address,
+        sup.account_bank,
+        sup.account_code,
+        sbi.taxpayer,
+        sup.business_scope,
+        sup.business_date_end,
+        sbi.updated_time,
+        sbi.enterprise_pro_type,
+        sbi.project_org_node,
+        sbi.project_org_name
+    </select>
+</mapper>
+
+
